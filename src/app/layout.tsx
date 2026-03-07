@@ -7,8 +7,8 @@ import { Toaster } from 'react-hot-toast';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Kodnest LMS Platform | Learn Skills Effortlessly",
-  description: "Advanced Learning Management System with deep progress tracking.",
+  title: "Kodemy | Master Growth Engineering",
+  description: "Advanced Learning Management System with deep progress tracking and minimalist focus.",
 };
 
 export default function RootLayout({
@@ -17,22 +17,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark scroll-smooth">
-      <body className={`${inter.className} bg-[#0a0a0c] selection:bg-indigo-500/20 antialiased`}>
+    <html lang="en" className="scroll-smooth">
+      <body className={`${inter.className} bg-white selection:bg-accent/10 antialiased`}>
         <AppShell>{children}</AppShell>
         <Toaster
           position="top-center"
           toastOptions={{
             duration: 3000,
             style: {
-              background: '#121216',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.05)',
-              borderRadius: '16px',
+              background: '#ffffff',
+              color: '#0f172a',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: '600',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
             },
             success: {
               iconTheme: {
-                primary: '#10b981',
+                primary: '#2563eb',
                 secondary: '#fff',
               },
             },

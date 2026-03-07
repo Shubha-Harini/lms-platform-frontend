@@ -1,14 +1,38 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @theme {
-  --color-background: #0a0a0c;
-  --color-foreground: #ffffff;
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-accent: #2563eb;
+  --color-accent-secondary: #4f46e5;
+  --color-card: #f8fafc;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
 }
 
 @layer base {
   body {
-    background-color: #0a0a0c;
-    color: white;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    @apply antialiased selection:bg-accent/10 selection:text-accent;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white border border-border shadow-sm rounded-xl transition-all duration-200;
+  }
+
+  .glass-card:hover {
+    @apply border-accent/20 shadow-md;
+  }
+
+  .premium-button-primary {
+    @apply relative px-5 py-2.5 rounded-lg font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 bg-accent text-white hover:bg-accent/90 shadow-sm;
+  }
+
+  .premium-button-secondary {
+    @apply relative px-5 py-2.5 rounded-lg font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 bg-white border border-border text-foreground hover:bg-slate-50;
   }
 }
 
@@ -22,12 +46,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* Chrome, Safari, Edge */
@@ -36,16 +60,16 @@
 }
 
 *::-webkit-scrollbar-track {
-  background: #0a0a0c;
+  background: #ffffff;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #1e1e24;
+  background: #e2e8f0;
   border-radius: 10px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #2d2d34;
+  background: #cbd5e1;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -54,7 +78,29 @@
 
 .hide-scrollbar {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
+}
+
+/* Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
 }

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import apiClient from '@/lib/apiClient';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
-import { ChevronDown, ChevronRight, PlayCircle, CheckCircle2, Lock } from 'lucide-react';
+import { ChevronDown, ChevronRight, PlayCircle, CheckCircle2, Lock, BookOpen, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Video {
@@ -33,22 +33,19 @@ export const SubjectSidebar: React.FC = () => {
     if (subjectId) {
       apiClient.get(`/subjects/${subjectId}/tree`)
         .then(res => {
-          setSections(res.data);
-          // Auto expand sections that have the current video
-          const currentSection = res.data.find((s: Section) =>
+          setSections(res.data || []);
+          const currentSection = res.data?.find((s: Section) =>
             s.videos.some(v => v.id.toString() === videoId)
           );
           if (currentSection) {
             setExpandedSections([currentSection.id]);
-          } else if (res.data.length > 0) {
+          } else if (res.data?.length > 0) {
             setExpandedSections([res.data[0].id]);
           }
           setLoading(false);
         })
-        .catch(err => {
-          if (err.response?.status !== 401 && err.response?.status !== 403) {
-            console.error(err);
-          }
+        .catch(() => {
+          setSections([]);
           setLoading(false);
         });
     }
@@ -60,32 +57,59 @@ export const SubjectSidebar: React.FC = () => {
     );
   };
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Loading curriculum...</div>;
+  if (loading) return (
+    <div className="p-12 space-y-6">
+      {[1, 2, 3, 4].map(i => (
+        <div key={i} className="h-16 w-full bg-white/5 rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  );
 
   return (
-    <aside className="w-full md:w-80 border-t md:border-t-0 md:border-r border-white/5 bg-[#0a0a0c] h-auto md:h-[calc(100vh-4rem)] md:sticky md:top-16 overflow-y-auto custom-scrollbar">
-      <div className="p-6">
-        <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-          Curriculum
-          <span className="text-[10px] uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md text-slate-400 font-normal">
-            Course Content
-          </span>
-        </h2>
+    <aside className="w-full md:w-80 lg:w-96 border-t md:border-t-0 md:border-r border-border bg-white h-auto md:h-[calc(100vh-4rem)] md:sticky md:top-16 overflow-y-auto custom-scrollbar">
+      <div className="p-6 md:p-8">
+        <div className="mb-8 space-y-2">
+          <div className="flex items-center gap-2 text-accent text-[9px] font-bold uppercase tracking-widest">
+            <BookOpen className="w-3 h-3" />
+            Curriculum
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">Course Content</h2>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 opacity-80">
+            <div className="flex items-center gap-1.5 text-[10px] text-muted font-bold">
+              <Clock className="w-3 h-3" />
+              18h 45m
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] text-muted font-bold">
+              <PlayCircle className="w-3 h-3" />
+              {sections.reduce((acc, s) => acc + s.videos.length, 0)} Lessons
+            </div>
+          </div>
+        </div>
 
-        <div className="space-y-4">
-          {sections.map((section) => (
+        <div className="space-y-3">
+          {sections.map((section, idx) => (
             <div key={section.id} className="space-y-2">
               <button
                 onClick={() => toggleSection(section.id)}
-                className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group"
+                className={`w-full flex items-center justify-between p-4 rounded-xl transition-all border group ${expandedSections.includes(section.id)
+                  ? 'bg-slate-50 border-border shadow-sm'
+                  : 'bg-transparent border-transparent hover:bg-slate-50'
+                  }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="text-xs font-bold text-indigo-400/70">SEC {section.order_index}</div>
-                  <span className="text-sm font-bold text-slate-200 group-hover:text-white truncate max-w-[140px]">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold border transition-all ${expandedSections.includes(section.id)
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-slate-100 text-muted border-slate-200'
+                    }`}>
+                    {idx + 1}
+                  </div>
+                  <span className={`text-sm font-bold text-left transition-colors ${expandedSections.includes(section.id) ? 'text-foreground' : 'text-muted group-hover:text-foreground'
+                    }`}>
                     {section.title}
                   </span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${expandedSections.includes(section.id) ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-300 ${expandedSections.includes(section.id) ? 'rotate-180 text-foreground' : ''
+                  }`} />
               </button>
 
               <AnimatePresence>
@@ -94,35 +118,49 @@ export const SubjectSidebar: React.FC = () => {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden space-y-1 pl-2"
+                    className="overflow-hidden space-y-1 pl-3"
                   >
                     {section.videos.map((video) => {
                       const isActive = video.id.toString() === videoId;
 
                       return (
-                        <div key={video.id} className="relative group/vid">
+                        <div key={video.id} className="relative group/vid flex items-center">
                           <Link
                             href={video.locked ? '#' : `/subjects/${subjectId}/video/${video.id}`}
                             className={`
-                              flex items-center gap-3 p-3 rounded-xl transition-all
+                              flex items-center gap-3 w-full p-3 rounded-lg transition-all border
                               ${isActive
-                                ? 'bg-indigo-600/10 border border-indigo-500/20 shadow-lg shadow-indigo-600/5'
-                                : 'hover:bg-white/5 border border-transparent'}
-                              ${video.locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                ? 'bg-accent/5 border-accent/10'
+                                : 'bg-transparent border-transparent hover:bg-slate-50'}
+                              ${video.locked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
                             `}
                             onClick={(e) => video.locked && e.preventDefault()}
                           >
-                            <div className={`p-1.5 rounded-lg ${isActive ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 group-hover/vid:text-white transition-colors'}`}>
+                            <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-all ${isActive
+                              ? 'bg-accent text-white'
+                              : video.is_completed
+                                ? 'bg-emerald-100 text-emerald-600'
+                                : 'bg-slate-100 text-muted group-hover/vid:bg-slate-200 group-hover/vid:text-foreground'
+                              }`}>
                               {video.is_completed
-                                ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                : (video.locked ? <Lock className="w-4 h-4" /> : <PlayCircle className="w-4 h-4" />)
+                                ? <CheckCircle2 className="w-2.5 h-2.5" />
+                                : (video.locked ? <Lock className="w-2.5 h-2.5" /> : <PlayCircle className="w-2.5 h-2.5" />)
                               }
                             </div>
-                            <span className={`text-xs font-medium truncate ${isActive ? 'text-indigo-300' : 'text-slate-400 group-hover/vid:text-slate-200 transition-colors'}`}>
-                              {video.title}
-                            </span>
+                            <div className="flex flex-col min-w-0">
+                              <span className={`text-[11px] font-bold truncate transition-colors ${isActive ? 'text-accent' : 'text-muted group-hover/vid:text-foreground'
+                                }`}>
+                                {video.title}
+                              </span>
+                              <span className="text-[9px] text-muted/60 font-medium">10:45 mins</span>
+                            </div>
                           </Link>
-                          {isActive && <motion.div layoutId="active-pill" className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-indigo-500 rounded-full" />}
+                          {isActive && (
+                            <motion.div
+                              layoutId="active-indicator"
+                              className="absolute -left-3 w-0.5 h-6 bg-accent rounded-r-full"
+                            />
+                          )}
                         </div>
                       );
                     })}
@@ -136,3 +174,4 @@ export const SubjectSidebar: React.FC = () => {
     </aside>
   );
 };
+
