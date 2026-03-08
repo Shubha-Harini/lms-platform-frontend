@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   LogOut,
   User as UserIcon,
@@ -21,9 +21,12 @@ import { useCourseStore } from '@/store/courseStore';
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { searchQuery, setSearchQuery } = useCourseStore();
+
+  const isAuthPage = pathname?.startsWith('/auth');
 
   useEffect(() => {
     setMounted(true);
@@ -58,18 +61,21 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
           <div className="hidden md:flex items-center gap-1">
             {[
               { label: 'Explore', href: '/', icon: LayoutDashboard },
-              { label: 'Challenges', href: '/practice', icon: Code2 },
-              { label: 'Assess', href: '/quiz', icon: BrainCircuit },
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-slate-100 transition-all"
-              >
-                <item.icon className="w-3.5 h-3.5" />
-                {item.label}
-              </Link>
-            ))}
+              { label: 'Challenges', href: '/practice', icon: Code2, protected: true },
+              { label: 'Assess', href: '/quiz', icon: BrainCircuit, protected: true },
+              { label: 'AI Assistant', href: '/ai-assistant', icon: Sparkles },
+            ]
+              .filter(item => !item.protected || isAuthenticated)
+              .map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-slate-100 transition-all"
+                >
+                  <item.icon className="w-3.5 h-3.5" />
+                  {item.label}
+                </Link>
+              ))}
           </div>
 
           <div className="flex items-center gap-4">
