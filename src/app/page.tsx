@@ -216,8 +216,8 @@ export default function DashboardPage() {
                     '1539571696357-5a69c17a67c6',
                     '1494790108377-be9c29b29330',
                     '1438761681033-6461ffad8d80'
-                  ].map((id, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
+                  ].map((id) => (
+                    <div key={id} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
                       <img src={`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=100&h=100&q=80`} className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -417,11 +417,11 @@ export default function DashboardPage() {
 
           <div className="relative z-10 grid grid-cols-1 gap-4 w-full max-w-xs">
             {[
-              { icon: Target, label: "Precision Learning", val: "100%" },
-              { icon: Zap, label: "Execution Speed", val: "3.5x" },
-              { icon: Sparkles, label: "Job Placement", val: "94%" }
-            ].map((metric, i) => (
-              <div key={i} className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm group hover:bg-white/10 transition-colors">
+              { id: 'precision', icon: Target, label: "Precision Learning", val: "100%" },
+              { id: 'execution', icon: Zap, label: "Execution Speed", val: "3.5x" },
+              { id: 'placement', icon: Sparkles, label: "Job Placement", val: "94%" }
+            ].map((metric) => (
+              <div key={metric.id} className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm group hover:bg-white/10 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
                     <metric.icon className="w-5 h-5" />

@@ -19,7 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCourseStore } from '@/store/courseStore';
 
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, initialize } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -30,6 +30,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   useEffect(() => {
     setMounted(true);
+    initialize(); // Restore auth state safely on client mount
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -43,7 +44,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 selection:text-white antialiased">
       {/* Premium Navbar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-2 bg-white/90 backdrop-blur-xl ${scrolled ? 'border-b border-border shadow-sm' : ''
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-2 bg-white/90 backdrop-blur-xl ${(mounted && scrolled) ? 'border-b border-border shadow-sm' : ''
         }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 group">
@@ -59,7 +60,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
-            {[
+            {mounted && [
               { label: 'Explore', href: '/', icon: LayoutDashboard },
               { label: 'Challenges', href: '/practice', icon: Code2, protected: true },
               { label: 'Assess', href: '/quiz', icon: BrainCircuit, protected: true },
@@ -136,11 +137,40 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
       </nav>
 
       {/* Main Content Area */}
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-20 md:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {children}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      {mounted && (
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-2xl border-t border-slate-200 px-6 py-3 flex justify-around items-center h-20 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] pb-[env(safe-area-inset-bottom,20px)]">
+          {[
+            { label: 'Explore', href: '/', icon: LayoutDashboard },
+            { label: 'Challenges', href: '/practice', icon: Code2, protected: true },
+            { label: 'Assess', href: '/quiz', icon: BrainCircuit, protected: true },
+            { label: 'AI', href: '/ai-assistant', icon: Sparkles },
+          ]
+            .filter(item => !item.protected || isAuthenticated)
+            .map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex flex-col items-center gap-1.5 px-3 py-1 rounded-2xl transition-all ${isActive ? 'text-accent scale-110' : 'text-slate-400 hover:text-slate-600'
+                    }`}
+                >
+                  <item.icon className={`w-6 h-6 ${isActive ? 'fill-accent/10' : ''}`} />
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+        </nav>
+      )}
 
       {/* Subtle Immersive Ambient Glows */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
@@ -148,7 +178,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 bg-slate-50">
+      <footer className="hidden md:block border-t border-border py-8 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-accent" />
